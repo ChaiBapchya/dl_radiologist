@@ -1,6 +1,9 @@
-import torch
-import torch.nn as nn
-from torchvision import datasets, models, transforms
+# import torch
+# import torch.nn as nn
+# from torchvision import datasets, models, transforms
+import mxnet
+from mxnet.gluon import nn, Block
+from mxnet.gluon.model_zoo import vision
 
 def set_parameter_requires_grad(model):
     i = 0
@@ -10,11 +13,11 @@ def set_parameter_requires_grad(model):
             for param in child.parameters():
                 param.requires_grad = False
 
-class inception_model(nn.Module):
+class inception_model(Block):
     def __init__(self):
-        aux_logits = False
+        # aux_logits = False
         super(inception_model, self).__init__()
-        self.inception = models.inception_v3(pretrained=True)
+        self.inception = vision.inception_v3(pretrained=True)
         # print((self.inception).size())
         set_parameter_requires_grad(self.inception)
         # Handle the auxilary net
@@ -37,23 +40,23 @@ class inception_model(nn.Module):
 class vgg_on_images(nn.Module):
     def __init__(self):
         super(vgg_on_images, self).__init__()
-        self.vgg_model = models.vgg11_bn(pretrained=True)
+        self.vgg_model = vision.vgg11_bn(pretrained=True)
         set_parameter_requires_grad(self.vgg_model)
         self.number_features = self.vgg_model.classifier[6].in_features
-        self.vgg_model.classifier[6] = nn.Linear(self.number_features,14)
+        self.vgg_model.classifier[6] = nn.Dense(self.number_features,14)
         self.input_size = 224
 
     def forward(self, x):
         return self.vgg_model(x).double()
 
 
-class feature_extractor(nn.Module):
+class feature_extractor(Block):
     def __init__(self):
         super(feature_extractor, self).__init__()
-        self.resnet_model = models.resnet18(pretrained=True)
+        self.resnet_model = vision.resnet18(pretrained=True)
         set_parameter_requires_grad(self.resnet_model)
         self.number_features = self.resnet_model.fc.in_features
-        self.resnet_model.fc = nn.Linear(self.number_features, 14)
+        self.resnet_model.fc = nn.Dense(self.number_features, 14)
         self.input_size = 224
 
 

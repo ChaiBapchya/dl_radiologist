@@ -61,7 +61,7 @@ def load_data(path, filename):  # Do this cleaning via Scala??
     return final_df.index.tolist(), final_df.values.tolist()
 
 
-Hyperparams
+# Hyperparams
 n_epoch = 1
 batch_size = 32
 num_workers = 4

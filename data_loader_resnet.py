@@ -1,9 +1,13 @@
-import torch
+# import torch
+import mxnet
 import numpy as np
 import pandas as pd
-from torch.utils import data
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+# from torch.utils import data
+# from torch.utils.data import Dataset, DataLoader
+# from torchvision import transforms, utils
+from mxnet.gluon import data
+from mxnet.gluon.data import DataLoader
+from mxnet.gluon.data.vision import transforms
 import os
 from PIL import Image
 
@@ -48,7 +52,8 @@ def load_data(path, filename):  # Do this cleaning via Scala??
 
     return final_df.index.tolist(), final_df.values.astype("double")
 
-print("Hello")
+
+# print("Hello")
 train_trans = transforms.Compose([
     transforms.RandomResizedCrop(224),
     # transforms.RandomHorizontalFlip(),

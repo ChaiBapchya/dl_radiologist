@@ -3,10 +3,17 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import torch.optim as optim
+# import torch
+# import torch.nn as nn
+# from torch.utils.data import DataLoader
+# import torch.optim as optim
+
+import mxnet
+from mxnet import npx
+from mxnet.gluon import nn, loss
+from mxnet.gluon.data import DataLoader
+from mxnet.gluon import Trainer
+
 
 # from data_loader import *
 from data_loader_resnet import *
@@ -18,12 +25,12 @@ import pickle
 from plots import plot_learning_curves
 
 if __name__ == "__main__":
-    torch.manual_seed(0)
-    if torch.cuda.is_available():
-        print("using cuda")
-        torch.cuda.manual_seed(0)
-    else:
-        print("no cuda")
+    mx.random.seed(0)
+    # if torch.cuda.is_available():
+    #     print("using cuda")
+    #     torch.cuda.manual_seed(0)
+    # else:
+    #     print("no cuda")
 
     start_time = time.time()
 
@@ -33,8 +40,9 @@ if __name__ == "__main__":
         # print(sys.argv[1])
     BATCH_SIZE = 4*32
     NUM_WORKERS = 16
-    NUM_EPOCHS = 2
+    NUM_EPOCHS = 1
     USE_CUDA = True
+    lr = 0.1
     train_trans = transforms.Compose([
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(), #AP/PA??
@@ -57,16 +65,25 @@ if __name__ == "__main__":
     train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, drop_last=True) #image_collate
     valid_loader = DataLoader(dataset=valid_dataset, batch_size=10, shuffle=False, num_workers=NUM_WORKERS, drop_last=False)
 
+    def try_all_gpus():
+        """Return all available GPUs, or [cpu(),] if no GPU exists."""
+        ctxes = [npx.gpu(i) for i in range(npx.num_gpus())]
+        return ctxes if ctxes and USE_CUDA else [npx.cpu()]
+
+    ctx = try_all_gpus()
+
     # model = Network()
     model = model_resnets.feature_extractor()
     # criterion = nn.CrossEntropyLoss()
     # criterion = nn.MSELoss()
-    criterion = nn.BCEWithLogitsLoss()
-    optimizer = optim.Adam(model.parameters())
+    # criterion = nn.BCEWithLogitsLoss()
+    loss = loss.SigmoidBinaryCrossEntropyLoss()  # computes BCE and sigmoid
+    # optimizer = optim.Adam(model.parameters())
+    trainer = Trainer(model.collect_params(),'adam', {'learning_rate': lr})
 
-    device = torch.device("cuda" if torch.cuda.is_available() and USE_CUDA else "cpu")
-    model.to(device)
-    criterion.to(device)
+    # device = torch.device("cuda" if torch.cuda.is_available() and USE_CUDA else "cpu")
+    # model.to(device)
+    # criterion.to(device)
 
     train_losses, train_accuracies = [], []
     valid_losses, valid_accuracies = [], []

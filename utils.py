@@ -1,8 +1,10 @@
 import os
 import time
 import numpy as np
-import torch
-import torch.nn as nn
+# import torch
+# import torch.nn as nn
+import mxnet
+from mxnet.gluon import nn
 import matplotlib.pyplot as plt
 import numpy as np
 

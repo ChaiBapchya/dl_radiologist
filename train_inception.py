@@ -3,10 +3,14 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import torch.optim as optim
+# import torch
+# import torch.nn as nn
+# from torch.utils.data import DataLoader
+# import torch.optim as optim
+
+import mxnet
+from mxnet.gluon import nn
+from mxnet.gluon.data import DataLoader
 
 # from data_loader import *
 from data_loader_resnet import *
